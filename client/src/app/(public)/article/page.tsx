@@ -39,7 +39,7 @@ export default function Article() {
     },
   ];
   return (
-    <div className="flex px-6 py-12 lg:px-8">
+    <div className="flex">
       <div className="space-y-6">
         <div className="text-center">
           <h1 className="font-bold text-4xl">Artikel</h1>

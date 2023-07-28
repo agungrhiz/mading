@@ -1,7 +1,11 @@
 "use client";
 
+import api from "@/lib/axios";
 import { useFormik } from "formik";
+import { useState } from "react";
 import * as Yup from "yup";
+import { setCookie } from "cookies-next";
+import { useRouter } from "next/navigation";
 
 const schema = Yup.object().shape({
   email: Yup.string().email("Email tidak valid").required("Email harus diisi"),
@@ -9,6 +13,9 @@ const schema = Yup.object().shape({
 });
 
 export default function FormLogin() {
+  const [serverError, setServerError] = useState(null);
+  const router = useRouter();
+
   const formik = useFormik({
     initialValues: {
       email: "",
@@ -16,11 +23,21 @@ export default function FormLogin() {
     },
     validationSchema: schema,
     onSubmit: async (values) => {
-      console.log(values);
+      api
+        .post("/auth/login", values)
+        .then((res) => {
+          setCookie("token", res.data.accessToken);
+          router.push("/dashboard");
+        })
+        .catch((err) => {
+          setServerError(err.response.data.message || "Terjadi kesalahan");
+        });
     },
   });
 
-  const { errors, touched, values, handleChange, handleBlur, handleSubmit } = formik;
+  const { errors, touched, values, handleChange, handleBlur, handleSubmit } =
+    formik;
+    
 
   return (
     <div className="card w-96 bg-base-100 shadow-xl">
@@ -30,22 +47,24 @@ export default function FormLogin() {
         </div>
 
         <form className="space-y-6" onSubmit={handleSubmit} method="POST">
-          <div className="alert alert-error">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="stroke-current shrink-0 h-6 w-6"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-            <span>Email atau Kata Sandi Salah</span>
-          </div>
+          {serverError && (
+            <div className="alert alert-error">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="stroke-current shrink-0 h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+              <span>{serverError}</span>
+            </div>
+          )}
 
           <div className="form-control w-full max-w-sm">
             <input

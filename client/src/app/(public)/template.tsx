@@ -17,7 +17,7 @@ export default function Template({ children }: { children: React.ReactNode }) {
   return (
     <div className="grid grid-rows-[auto,1fr] min-h-screen">
       <Navbar menu={menu} />
-      <main>{children}</main>
+      <main className="px-6 py-12 lg:px-8">{children}</main>
     </div>
   );
 }
